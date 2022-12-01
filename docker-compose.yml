@@ -1,0 +1,52 @@
+version: "3.8"
+
+services:
+  api:
+    env_file: ${DOT_ENV_FILE:-.env-none}
+    # Ensure specific environment variables are ALWAYS available.
+    environment:
+      - FLASK_APP=${FLASK_APP:-app.py}
+      - FLASK_ENV=${FLASK_ENV:-development}
+      - FLASK_RUN_PORT=${FLASK_RUN_PORT:-5000}
+      - LOG_TYPE=${LOG_TYPE:-}
+      - NO_AUTO_START=${NO_AUTO_START:-}
+      - POSTGRES_DB=${POSTGRES_DB:-pfaas_dev}
+      - POSTGRES_DB_TEST=${POSTGRES_DB:-pfaas_test}
+      - POSTGRES_HOST=${POSTGRES_HOST:-host.docker.internal}
+      - POSTGRES_HOST_TEST=${POSTGRES_HOST_TEST:-host.docker.internal}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_PORT_TEST=${POSTGRES_PORT_TEST:-5432}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-docker}
+      - POSTGRES_PASSWORD_TEST=${POSTGRES_PASSWORD_TEST:-docker}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_USER_TEST=${POSTGRES_USER_TEST:-postgres}
+      - PYTHONUNBUFFERED=1
+      - PYTHON_VERSION=${PYTHON_VERSION:-3.8}
+      - SECRET_KEY=${SECRET_KEY:-some_real_good_secret}
+      - SNAKEVIZ_PORT=${SNAKEVIZ_PORT:-8020}
+      - SSL_ENABLED=${SSL_ENABLED:-}
+    build:
+      context: ./
+      dockerfile: Dockerfile-dev
+      args:
+        pythonVersion: ${PYTHON_VERSION:-3.8}
+    container_name: python-flask-ariadne-api-starter
+    image: python-flask-ariadne-api-starter:dev
+    command:
+      - "sh"
+      - "-c"
+      - "if [ ${NO_AUTO_START:-} ]; then tail -f /dev/null; else python /app/run.py; fi"
+    ports:
+      - ${FLASK_RUN_PORT:-5000}:${FLASK_RUN_PORT:-5000}
+      - ${SNAKEVIZ_PORT:-8020}:${SNAKEVIZ_PORT:-8020}
+    volumes:
+      - .:/app:delegated
+      - ~/.gitconfig:/root/.gitconfig:delegated
+      - ~/.ssh:/root/.ssh:delegated
+      - python-flask-ariadne-api-starter-dev-root-vol:/root:delegated
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+volumes:
+  python-flask-ariadne-api-starter-dev-root-vol:
